@@ -50,7 +50,7 @@ public abstract class GuiGraphicsMixin {
     }
 
     @ModifyArgs(
-            method = "drawString(Lnet/minecraft/client/gui/Font;Lnet/minecraft/util/FormattedCharSequence;IIIZ)V",
+            method = "text(Lnet/minecraft/client/gui/Font;Lnet/minecraft/util/FormattedCharSequence;IIIZ)V",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/client/renderer/state/gui/GuiTextRenderState;<init>(Lnet/minecraft/client/gui/Font;Lnet/minecraft/util/FormattedCharSequence;Lorg/joml/Matrix3x2f;IIIIZLnet/minecraft/client/gui/navigation/ScreenRectangle;)V"
