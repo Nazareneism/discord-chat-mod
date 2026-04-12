@@ -12,6 +12,7 @@ import net.minecraft.commands.arguments.MessageArgument;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.PlayerChatMessage;
+import net.minecraft.server.permissions.Permissions;
 import java.util.Map;
 
 import static com.denisnumb.discord_chat_mod.MinecraftUtils.processChatMessage;
@@ -27,7 +28,7 @@ public class SayCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher){
         dispatcher.register(
                 Commands.literal("say")
-                        .requires(source -> source.hasPermission(2))
+                        .requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
                         .then(Commands.argument("message", MessageArgument.message())
                                 .executes(context -> {
                                     MessageArgument.resolveChatMessage(context, "message", (resolvedMessage) -> {

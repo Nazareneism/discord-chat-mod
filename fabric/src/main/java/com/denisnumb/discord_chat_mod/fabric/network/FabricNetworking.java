@@ -14,14 +14,14 @@ import net.fabricmc.fabric.api.networking.v1.ServerPlayNetworking;
 
 public class FabricNetworking {
     public static void init() {
-        PayloadTypeRegistry.playC2S().register(RequestDiscordMentionsPacket.TYPE, RequestDiscordMentionsPacket.STREAM_CODEC);
-        PayloadTypeRegistry.playS2C().register(DiscordMentionsPartPacket.TYPE, DiscordMentionsPartPacket.STREAM_CODEC);
-        PayloadTypeRegistry.playC2S().register(ScreenshotPartPacket.TYPE, ScreenshotPartPacket.STREAM_CODEC);
-        PayloadTypeRegistry.playS2C().register(ScreenshotPartPacket.TYPE, ScreenshotPartPacket.STREAM_CODEC);
-        PayloadTypeRegistry.playS2C().register(DiscordEmojisPartPacket.TYPE, DiscordEmojisPartPacket.STREAM_CODEC);
-        PayloadTypeRegistry.playC2S().register(RequestDiscordEmojisPacket.TYPE, RequestDiscordEmojisPacket.STREAM_CODEC);
-        PayloadTypeRegistry.playS2C().register(DiscordStickersPartPacket.TYPE, DiscordStickersPartPacket.STREAM_CODEC);
-        PayloadTypeRegistry.playC2S().register(RequestDiscordStickersPacket.TYPE, RequestDiscordStickersPacket.STREAM_CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(RequestDiscordMentionsPacket.TYPE, RequestDiscordMentionsPacket.STREAM_CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(DiscordMentionsPartPacket.TYPE, DiscordMentionsPartPacket.STREAM_CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(ScreenshotPartPacket.TYPE, ScreenshotPartPacket.STREAM_CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(ScreenshotPartPacket.TYPE, ScreenshotPartPacket.STREAM_CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(DiscordEmojisPartPacket.TYPE, DiscordEmojisPartPacket.STREAM_CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(RequestDiscordEmojisPacket.TYPE, RequestDiscordEmojisPacket.STREAM_CODEC);
+        PayloadTypeRegistry.clientboundPlay().register(DiscordStickersPartPacket.TYPE, DiscordStickersPartPacket.STREAM_CODEC);
+        PayloadTypeRegistry.serverboundPlay().register(RequestDiscordStickersPacket.TYPE, RequestDiscordStickersPacket.STREAM_CODEC);
 
         ServerPlayNetworking.registerGlobalReceiver(RequestDiscordMentionsPacket.TYPE, (packet, context) -> {
             context.server().execute(() -> PacketHandler.handleRequestDiscordMentionsPacket(context.player()));

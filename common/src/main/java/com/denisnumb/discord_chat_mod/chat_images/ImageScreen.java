@@ -4,13 +4,13 @@ import com.denisnumb.discord_chat_mod.chat_images.model.AbstractImage;
 import com.denisnumb.discord_chat_mod.chat_images.model.AnimatedImage;
 import com.denisnumb.discord_chat_mod.chat_images.model.Image;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.input.KeyEvent;
 import net.minecraft.client.input.MouseButtonEvent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.jetbrains.annotations.NotNull;
 
 public class ImageScreen extends Screen {
@@ -31,8 +31,8 @@ public class ImageScreen extends Screen {
 
 
     @Override
-    public void render(@NotNull GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-        super.render(graphics, mouseX, mouseY, partialTicks);
+    public void extractRenderState(@NotNull GuiGraphicsExtractor graphics, int mouseX, int mouseY, float partialTicks) {
+        super.extractRenderState(graphics, mouseX, mouseY, partialTicks);
 
         graphics.fill(0, 0, this.width, this.height, 0x88000000);
 
@@ -45,7 +45,7 @@ public class ImageScreen extends Screen {
         centerX = (this.width - renderWidth) / 2;
         centerY = (this.height - renderHeight) / 2;
 
-        ResourceLocation resourceLocation = image instanceof AnimatedImage gif
+        Identifier resourceLocation = image instanceof AnimatedImage gif
                 ? gif.getCurrentFrame()
                 : ((Image) image).resourceLocation;
 

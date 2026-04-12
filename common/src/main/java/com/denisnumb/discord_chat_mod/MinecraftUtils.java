@@ -17,6 +17,8 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.network.chat.ResolutionContext;
+import net.minecraft.server.permissions.LevelBasedPermissionSet;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import org.jetbrains.annotations.Nullable;
@@ -68,7 +70,7 @@ public class MinecraftUtils {
         try {
             CommandSourceStack fakeSource = server.createCommandSourceStack()
                     .withSuppressedOutput()
-                    .withPermission(4);
+                    .withPermission(LevelBasedPermissionSet.OWNER);
             EntitySelectorParser parser = new EntitySelectorParser(new StringReader(selector), true);
 
             return parser.parse().findPlayers(fakeSource);
@@ -80,7 +82,7 @@ public class MinecraftUtils {
     public static void sendMessageToPlayersBySelector(Component message, String selector) {
         try {
             for (ServerPlayer player : getPlayerListBySelector(selector))
-                player.sendSystemMessage(ComponentUtils.updateForEntity(null, message, player, 0), false);
+                player.sendSystemMessage(ComponentUtils.resolve(ResolutionContext.create(server.createCommandSourceStack()), message, 0));
         } catch (CommandSyntaxException e) {
             e.printStackTrace();
         } catch (Exception ignored) {}

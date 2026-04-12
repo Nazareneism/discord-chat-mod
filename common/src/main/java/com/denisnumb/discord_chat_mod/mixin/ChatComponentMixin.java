@@ -8,14 +8,17 @@ import com.denisnumb.discord_chat_mod.chat_images.model.ImageSize;
 import com.denisnumb.discord_chat_mod.config.ConfigProvider;
 import com.google.common.collect.Lists;
 import com.llamalad7.mixinextras.sugar.Local;
-import net.minecraft.client.GuiMessage;
-import net.minecraft.client.GuiMessageTag;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.ChatComponent;
+import net.minecraft.client.multiplayer.chat.GuiMessage;
+import net.minecraft.client.multiplayer.chat.GuiMessageSource;
+import net.minecraft.client.multiplayer.chat.GuiMessageTag;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.ChatComponent;
 import net.minecraft.client.renderer.RenderPipelines;
 import net.minecraft.network.chat.*;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.util.ARGB;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
@@ -48,10 +51,10 @@ public abstract class ChatComponentMixin {
     @Shadow public abstract int getLinesPerPage();
 
     @ModifyArg(
-            method = "addMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;Lnet/minecraft/client/GuiMessageTag;)V",
+            method = "addMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;Lnet/minecraft/client/multiplayer/chat/GuiMessageSource;Lnet/minecraft/client/multiplayer/chat/GuiMessageTag;)V",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/client/GuiMessage;<init>(ILnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;Lnet/minecraft/client/GuiMessageTag;)V"
+                    target = "Lnet/minecraft/client/multiplayer/chat/GuiMessage;<init>(ILnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;Lnet/minecraft/client/multiplayer/chat/GuiMessageSource;Lnet/minecraft/client/multiplayer/chat/GuiMessageTag;)V"
             ),
             index = 1,
             require = 0
@@ -86,10 +89,10 @@ public abstract class ChatComponentMixin {
     }
 
     @Inject(
-            method = "addMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;Lnet/minecraft/client/GuiMessageTag;)V",
+            method = "addMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/MessageSignature;Lnet/minecraft/client/multiplayer/chat/GuiMessageSource;Lnet/minecraft/client/multiplayer/chat/GuiMessageTag;)V",
             at = @At("TAIL")
     )
-    private void addMessage(Component chatComponent, MessageSignature headerSignature, GuiMessageTag tag, CallbackInfo ci, @Local GuiMessage guimessage){
+    private void addMessage(Component chatComponent, MessageSignature headerSignature, GuiMessageSource source, GuiMessageTag tag, CallbackInfo ci, @Local GuiMessage guimessage){
         List<String> componentUrls = discord_minecraft_chat$getComponentUrls(chatComponent);
         if (componentUrls.isEmpty())
             return;
@@ -112,12 +115,13 @@ public abstract class ChatComponentMixin {
                         );
                 FormattedCharSequence imageCharSequence = imageComponent.getVisualOrderText();
 
+                GuiMessage imageGuiMessage = new GuiMessage(guimessage.addedTime(), imageComponent, headerSignature, GuiMessageSource.SYSTEM_CLIENT, tag);
                 for (int i = 0; i < linesCount; i++)
-                    trimmedMessages.add(trimmedIndex, new GuiMessage.Line(guimessage.addedTime(), imageCharSequence, tag, true));
+                    trimmedMessages.add(trimmedIndex, new GuiMessage.Line(imageGuiMessage, imageCharSequence, true));
                 trimmedIndex += linesCount;
 
                 for (int i = 0; i < linesCount; i++)
-                    allMessages.add(allIndex, new GuiMessage(guimessage.addedTime(), imageComponent, headerSignature, tag));
+                    allMessages.add(allIndex, imageGuiMessage);
                 allIndex += linesCount;
             }
         });
@@ -166,8 +170,8 @@ public abstract class ChatComponentMixin {
         }
     }
 
-    @Inject(method = "render", at = @At("TAIL"))
-    private void render(GuiGraphics graphics, int tickCount, int mouseX, int mouseY, boolean focused, CallbackInfo ci){
+    @Inject(method = "extractRenderState", at = @At("TAIL"))
+    private void render(GuiGraphicsExtractor graphics, Font font, int tickCount, int mouseX, int mouseY, ChatComponent.DisplayMode displayMode, boolean focused, CallbackInfo ci){
         Map<Integer, List<String>> allChatUrls = new HashMap<>();
         for (int i = 0; i < allMessages.size(); ++i) {
             GuiMessage guiMessage = allMessages.get(i);
@@ -217,8 +221,8 @@ public abstract class ChatComponentMixin {
                 AbstractImage abstractImage = IMAGE_CACHE.get(imageUrl);
                 ImageSize imageSize = abstractImage.imageSize;
 
-                ResourceLocation resourceLocation = abstractImage.isSpoilerAndNotOpened()
-                        ? abstractImage.spoilerResourceLocation
+                Identifier resourceLocation = abstractImage.isSpoilerAndNotOpened()
+                        ? abstractImage.spoilerIdentifier
                         : abstractImage instanceof AnimatedImage gif
                         ? gif.getCurrentFrame()
                         : ((Image) abstractImage).resourceLocation;
@@ -268,7 +272,7 @@ public abstract class ChatComponentMixin {
                         graphics.pose().translate(textX, textY);
                         graphics.pose().scale(scale, scale);
 
-                        graphics.drawString(minecraft.font,
+                        graphics.text(minecraft.font,
                                 spoilerText,
                                 0, 0,
                                 ARGB.color(0xFFFFFF, -1),

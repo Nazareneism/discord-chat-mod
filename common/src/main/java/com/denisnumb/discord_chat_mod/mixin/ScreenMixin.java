@@ -6,7 +6,7 @@ import com.denisnumb.discord_chat_mod.chat_images.utils.ImageUtils;
 import com.denisnumb.discord_chat_mod.chat_images.model.AbstractImage;
 import com.denisnumb.discord_chat_mod.network.screenshot.ScreenshotTransceiver;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.StringUtil;
@@ -20,12 +20,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.io.File;
 import java.net.URI;
 
-@Mixin(Screen.class)
+@Mixin(ChatScreen.class)
 public abstract class ScreenMixin {
     @Shadow protected Minecraft minecraft;
 
     @Inject(method = "handleComponentClicked", at = @At("HEAD"), cancellable = true)
-    private void handleComponentClicked(Style style, CallbackInfoReturnable<Boolean> cir){
+    private void handleComponentClicked(Style style, boolean bl, CallbackInfoReturnable<Boolean> cir){
         if (style != null){
             ClickEvent clickEvent = style.getClickEvent();
             if (clickEvent != null){

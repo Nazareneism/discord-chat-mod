@@ -9,12 +9,10 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.ComponentArgument;
 import net.minecraft.commands.arguments.EntityArgument;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.ComponentContents;
-import net.minecraft.network.chat.ComponentUtils;
-import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.*;
 import net.minecraft.network.chat.contents.SelectorContents;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.permissions.Permissions;
 
 import java.util.Collection;
 import java.util.List;
@@ -30,7 +28,7 @@ public class TellrawCommand {
     public static void register(CommandDispatcher<CommandSourceStack> dispatcher, CommandBuildContext context){
         dispatcher.register(
                 Commands.literal("tellraw")
-                        .requires(source -> source.hasPermission(2))
+                        .requires(source -> source.permissions().hasPermission(Permissions.COMMANDS_GAMEMASTER))
                         .then(Commands.argument("targets", EntityArgument.players())
                                 .then(Commands.argument("message", ComponentArgument.textComponent(context))
                                         .executes(ctx -> {
@@ -55,7 +53,7 @@ public class TellrawCommand {
                                             }
 
                                             for (ServerPlayer player : players)
-                                                player.sendSystemMessage(ComponentUtils.updateForEntity(ctx.getSource(), message, player, 0), false);
+                                                player.sendSystemMessage(ComponentUtils.resolve(ResolutionContext.create(ctx.getSource()), message, 0));
                                             return players.size();
                                         })
                                 )
@@ -65,10 +63,10 @@ public class TellrawCommand {
 
     private static String parseComponentContents(ComponentContents componentContents, Style style){
         try {
-            Component component = componentContents.resolve(null, null, 0);
+            Component component = componentContents.resolve(null, 0);
 
             if (componentContents instanceof SelectorContents selectorContents){
-                List<ServerPlayer> playerList = getPlayerListBySelector(selectorContents.selector().pattern());
+                List<ServerPlayer> playerList = getPlayerListBySelector(selectorContents.selector().source());
                 String result = component.getString();
 
                 if (!playerList.isEmpty())

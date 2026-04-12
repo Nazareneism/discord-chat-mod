@@ -5,7 +5,7 @@ import com.denisnumb.discord_chat_mod.markdown.MarkdownToComponentConverter;
 import com.llamalad7.mixinextras.injector.ModifyExpressionValue;
 import com.llamalad7.mixinextras.sugar.Local;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.FormattedCharSequence;
@@ -54,7 +54,7 @@ public abstract class EditBoxMixin {
     }
 
     @Inject(
-            method = "renderWidget",
+            method = "extractWidgetRenderState",
             at = @At(
                     value = "INVOKE",
                     target = "Ljava/lang/String;isEmpty()Z",
@@ -62,7 +62,7 @@ public abstract class EditBoxMixin {
                     shift = At.Shift.AFTER
             )
     )
-    private void prepareMarkdown(GuiGraphics guiGraphics, int i, int j, float f, CallbackInfo ci, @Local String string) {
+    private void prepareMarkdown(GuiGraphicsExtractor guiGraphics, int i, int j, float f, CallbackInfo ci, @Local String string) {
         if (!string.isEmpty() && !value.startsWith("/")) {
             if (!string.equals(discord_chat_mod$lastInput)){
                 discord_chat_mod$lastInput = string;
@@ -80,7 +80,7 @@ public abstract class EditBoxMixin {
     }
 
     @ModifyExpressionValue(
-            method = "renderWidget",
+            method = "extractWidgetRenderState",
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/client/gui/components/EditBox;applyFormat(Ljava/lang/String;I)Lnet/minecraft/util/FormattedCharSequence;",
@@ -101,10 +101,10 @@ public abstract class EditBoxMixin {
     }
 
     @ModifyArg(
-            method = "renderWidget",
+            method = "extractWidgetRenderState",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/client/gui/GuiGraphics;drawString(Lnet/minecraft/client/gui/Font;Lnet/minecraft/util/FormattedCharSequence;IIIZ)V",
+                    target = "Lnet/minecraft/client/gui/GuiGraphicsExtractor;text(Lnet/minecraft/client/gui/Font;Lnet/minecraft/util/FormattedCharSequence;IIIZ)V",
                     ordinal = 1
             ),
             require = 0
