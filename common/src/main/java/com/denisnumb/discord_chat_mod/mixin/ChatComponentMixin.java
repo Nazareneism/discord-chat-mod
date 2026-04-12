@@ -137,39 +137,6 @@ public abstract class ChatComponentMixin {
         return ConfigProvider.getConfig().maxChatHistory();
     }
 
-    @Inject(method = "addMessageToQueue",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Ljava/util/List;add(ILjava/lang/Object;)V",
-                    shift = At.Shift.AFTER
-            )
-    )
-    private void removeOldFromAllMessages(GuiMessage message, CallbackInfo ci) {
-        while(allMessages.size() > ConfigProvider.getConfig().maxChatHistory()) {
-            int parentAddedTime = allMessages.getLast().addedTime();
-
-            do allMessages.removeLast();
-            while (allMessages.getLast().addedTime() == parentAddedTime);
-        }
-    }
-
-    @Inject(method = "addMessageToDisplayQueue",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Ljava/util/List;add(ILjava/lang/Object;)V",
-                    shift = At.Shift.BY,
-                    by = 2
-            )
-    )
-    private void removeOldFromTrimmedMessages(GuiMessage message, CallbackInfo ci) {
-        while(trimmedMessages.size() > ConfigProvider.getConfig().maxChatHistory()) {
-            int parentAddedTime = trimmedMessages.getLast().addedTime();
-
-            do trimmedMessages.removeLast();
-            while (trimmedMessages.getLast().addedTime() == parentAddedTime);
-        }
-    }
-
     @Inject(method = "extractRenderState", at = @At("TAIL"))
     private void render(GuiGraphicsExtractor graphics, Font font, int tickCount, int mouseX, int mouseY, ChatComponent.DisplayMode displayMode, boolean focused, CallbackInfo ci){
         Map<Integer, List<String>> allChatUrls = new HashMap<>();
