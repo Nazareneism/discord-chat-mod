@@ -11,7 +11,6 @@ import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.StringUtil;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -22,7 +21,6 @@ import java.net.URI;
 
 @Mixin(ChatScreen.class)
 public abstract class ScreenMixin {
-    @Shadow protected Minecraft minecraft;
 
     @Inject(method = "handleComponentClicked", at = @At("HEAD"), cancellable = true)
     private void handleComponentClicked(Style style, boolean bl, CallbackInfoReturnable<Boolean> cir){
@@ -47,7 +45,7 @@ public abstract class ScreenMixin {
                             if (image.isSpoilerAndNotOpened())
                                 image.openSpoiler();
                             else {
-                                minecraft.setScreen(new ImageScreen(image));
+                                Minecraft.getInstance().setScreen(new ImageScreen(image));
                             }
                         }
                         cir.setReturnValue(true);
@@ -62,6 +60,6 @@ public abstract class ScreenMixin {
         File screenshotFile = new File(filePath);
 
         if (screenshotFile.exists() && screenshotFile.isFile() && screenshotFile.getName().endsWith(".png"))
-            ScreenshotTransceiver.sendScreenshotToServer(screenshotFile, minecraft.player, sendAsSpoiler);
+            ScreenshotTransceiver.sendScreenshotToServer(screenshotFile, Minecraft.getInstance().player, sendAsSpoiler);
     }
 }
