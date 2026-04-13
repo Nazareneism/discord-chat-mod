@@ -9,7 +9,7 @@ import com.google.gson.JsonObject;
 import com.mojang.logging.LogUtils;
 import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
@@ -61,8 +61,8 @@ public class AdvancementIconParser {
 
     public static Optional<DiscordMessageUtils.ImageData> parseAdvancementIcon(DisplayInfo displayInfo) {
         try {
-            ItemStack stack = displayInfo.getIcon();
-            ResourceLocation id = BuiltInRegistries.ITEM.getKey(stack.getItem());
+            ItemStack stack = displayInfo.getIcon().create();
+            Identifier id = BuiltInRegistries.ITEM.getKey(stack.getItem());
             String namespace = id.getNamespace();
             String name = id.getPath();
 
@@ -85,7 +85,7 @@ public class AdvancementIconParser {
             }
 
         } catch (Exception e) {
-            LOGGER.error("AdvancementIconParseError [{}]: {}", displayInfo.getIcon().getItem().getDescriptionId(), e.getMessage());
+            LOGGER.error("AdvancementIconParseError [{}]: {}", displayInfo.getIcon().create().getItem().getDescriptionId(), e.getMessage());
         }
 
         return Optional.empty();

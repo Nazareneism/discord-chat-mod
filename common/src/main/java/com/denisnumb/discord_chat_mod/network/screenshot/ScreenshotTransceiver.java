@@ -174,6 +174,6 @@ public class ScreenshotTransceiver {
 
     private static void sendErrorMessageToPlayer(Player player, String errorMessage) {
         String message = String.format(getTranslate(SCREENSHOT_SENDING_ERROR_WITH_REASON), errorMessage);
-        player.displayClientMessage(Component.literal(message).withStyle(ChatFormatting.RED), false);
+        player.sendSystemMessage(Component.literal(message).withStyle(ChatFormatting.RED));
     }
 }

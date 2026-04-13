@@ -6,12 +6,11 @@ import com.denisnumb.discord_chat_mod.chat_images.utils.ImageUtils;
 import com.denisnumb.discord_chat_mod.chat_images.model.AbstractImage;
 import com.denisnumb.discord_chat_mod.network.screenshot.ScreenshotTransceiver;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.gui.screens.ChatScreen;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Style;
 import net.minecraft.util.StringUtil;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -20,12 +19,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import java.io.File;
 import java.net.URI;
 
-@Mixin(Screen.class)
+@Mixin(ChatScreen.class)
 public abstract class ScreenMixin {
-    @Shadow protected Minecraft minecraft;
 
     @Inject(method = "handleComponentClicked", at = @At("HEAD"), cancellable = true)
-    private void handleComponentClicked(Style style, CallbackInfoReturnable<Boolean> cir){
+    private void handleComponentClicked(Style style, boolean bl, CallbackInfoReturnable<Boolean> cir){
         if (style != null){
             ClickEvent clickEvent = style.getClickEvent();
             if (clickEvent != null){
@@ -47,7 +45,7 @@ public abstract class ScreenMixin {
                             if (image.isSpoilerAndNotOpened())
                                 image.openSpoiler();
                             else {
-                                minecraft.setScreen(new ImageScreen(image));
+                                Minecraft.getInstance().setScreen(new ImageScreen(image));
                             }
                         }
                         cir.setReturnValue(true);
@@ -62,6 +60,6 @@ public abstract class ScreenMixin {
         File screenshotFile = new File(filePath);
 
         if (screenshotFile.exists() && screenshotFile.isFile() && screenshotFile.getName().endsWith(".png"))
-            ScreenshotTransceiver.sendScreenshotToServer(screenshotFile, minecraft.player, sendAsSpoiler);
+            ScreenshotTransceiver.sendScreenshotToServer(screenshotFile, Minecraft.getInstance().player, sendAsSpoiler);
     }
 }

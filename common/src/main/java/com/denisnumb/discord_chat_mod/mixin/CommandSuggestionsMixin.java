@@ -21,12 +21,12 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.vdurmont.emoji.Emoji;
 import com.vdurmont.emoji.EmojiManager;
 import net.minecraft.client.gui.Font;
-import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.GuiGraphicsExtractor;
 import net.minecraft.client.gui.components.CommandSuggestions;
 import net.minecraft.client.gui.components.EditBox;
 import net.minecraft.client.renderer.Rect2i;
 import net.minecraft.client.renderer.RenderPipelines;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.resources.Identifier;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -54,15 +54,15 @@ public abstract class CommandSuggestionsMixin {
     @Shadow @Final int fillColor;
 
     @Inject(
-            method = "renderSuggestions",
+            method = "extractSuggestions",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/client/gui/components/CommandSuggestions$SuggestionsList;render(Lnet/minecraft/client/gui/GuiGraphics;II)V",
+                    target = "Lnet/minecraft/client/gui/components/CommandSuggestions$SuggestionsList;extractRenderState(Lnet/minecraft/client/gui/GuiGraphicsExtractor;II)V",
                     shift = At.Shift.AFTER
             ),
             require = 0
     )
-    private void renderExtras(GuiGraphics guiGraphics, int mouseX, int mouseY, CallbackInfoReturnable<Boolean> cir) {
+    private void renderExtras(GuiGraphicsExtractor guiGraphics, int mouseX, int mouseY, CallbackInfoReturnable<Boolean> cir) {
         if (this.suggestions == null)
             return;
 
@@ -82,25 +82,25 @@ public abstract class CommandSuggestionsMixin {
     }
 
     @Unique
-    private void discord_chat_mod$renderColors(GuiGraphics guiGraphics, Rect2i rect, Integer color){
+    private void discord_chat_mod$renderColors(GuiGraphicsExtractor guiGraphics, Rect2i rect, Integer color){
         String text = getTranslate(COLORED_TEXT_EXAMPLE);
         int boxHeight = font.lineHeight + 4;
         int boxWidth = font.width(text) + 4;
         int boxX = rect.getX() + rect.getWidth() + 2;
         int boxY = rect.getY() + rect.getHeight() - boxHeight;
         guiGraphics.fill(boxX, boxY, boxX + boxWidth, boxY + boxHeight, fillColor);
-        guiGraphics.drawString(font, text, boxX + 2, boxY + 2, color, false);
+        guiGraphics.text(font, text, boxX + 2, boxY + 2, color, false);
     }
 
     @Unique
-    private void discord_chat_mod$renderStickerPreview(GuiGraphics guiGraphics, Rect2i rect, Suggestion currentSuggestion) {
+    private void discord_chat_mod$renderStickerPreview(GuiGraphicsExtractor guiGraphics, Rect2i rect, Suggestion currentSuggestion) {
         DiscordStickersTransceiver.requestDiscordStickers();
         AbstractImage image = StickersProvider.CLIENT_STICKER_CACHE.get(currentSuggestion.getText());
 
         if (image == null)
             return;
 
-        ResourceLocation imageLocation = image instanceof AnimatedImage animatedImage
+        Identifier imageLocation = image instanceof AnimatedImage animatedImage
                 ? animatedImage.getCurrentFrame()
                 : ((Image) image).resourceLocation;
 
